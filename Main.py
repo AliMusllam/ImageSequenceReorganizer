@@ -22,7 +22,7 @@ def slice_and_group_images(folder_path, file_name, grid_size, final_width):
             return
         
         # Create a subfolder to save grouped images
-        subfolder_path = os.path.join(folder_path, "slices")
+        subfolder_path = os.path.join(folder_path, "output")
         os.makedirs(subfolder_path, exist_ok=True)
         
         # Slice and group each image
