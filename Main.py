@@ -76,6 +76,6 @@ def slice_and_group_images(folder_path, file_name, grid_size, final_width):
             # Save the grouped image in the subfolder
             final_image.save(os.path.join(subfolder_path, f"{file_name}_{i}.png"))
 
-# Test the function
 path = select_folder()
-slice_and_group_images(path, "slice", (2, 2), 2) 
+# CHANGE THESE VALUES
+slice_and_group_images(path, "output", (2, 2), 2) 
