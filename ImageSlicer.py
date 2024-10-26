@@ -1,20 +1,28 @@
 from PIL import Image
 import os
-from tkinter import filedialog
+from tkinter import filedialog, Tk
 
 def select_folder():
-    # Folder path
+    """Opens a folder selection dialog and returns the selected folder path."""
+    root = Tk()
+    root.withdraw()  # Hide the Tkinter root window
     folder_path = filedialog.askdirectory()
     return folder_path
 
 def slice_and_group_images(folder_path, file_name, grid_size, final_width):
+    """
+    Slices images in the selected folder into a grid and groups them into final images of the specified width.
 
-
+    Args:
+        folder_path (str): The path of the folder containing images.
+        file_name (str): The base file name for the output images.
+        grid_size (tuple): A tuple (x, y) specifying the grid size to slice each image.
+        final_width (int): The number of slices per row in the output images.
+    """
     if folder_path:
         print("Slicing and grouping images in folder:", folder_path)
 
-
-        # Collect only image files in the folder
+        # Collect image files in the folder
         image_files = [os.path.join(folder_path, file) for file in os.listdir(folder_path) if file.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp'))]
 
         if not image_files: 
@@ -25,45 +33,46 @@ def slice_and_group_images(folder_path, file_name, grid_size, final_width):
         subfolder_path = os.path.join(folder_path, "output")
         os.makedirs(subfolder_path, exist_ok=True)
         
+        # Initialize a list to store slices for each group
+        grouped_images = [[] for _ in range(grid_size[0] * grid_size[1])]
+
         # Slice and group each image
-        grouped_images = [[] for _ in range(grid_size[0] * grid_size[1])]  # List to store slices for each group
-
         for image_file in image_files:
-            # Open the image
             image = Image.open(image_file)
-
-            # Resize the image to fit into the grid
             width, height = image.size
+
+            # Calculate slice width and height
             slice_width = width // grid_size[0]
             slice_height = height // grid_size[1]
+
+            # Resize image to match the exact grid
             image = image.resize((slice_width * grid_size[0], slice_height * grid_size[1]))
 
-            # Slice the image into the grid
+            # Slice the image into grid
             slices = []
             for i in range(grid_size[1]):
                 for j in range(grid_size[0]):
-                    # Define the bounding box for the slice
                     left = j * slice_width
                     upper = i * slice_height
                     right = left + slice_width
                     lower = upper + slice_height
-
-                    # Crop the slice from the original image
                     slice_image = image.crop((left, upper, right, lower))
                     slices.append(slice_image)
 
-            # Add slices to their corresponding group
+            # Group the slices
             for i, slice_image in enumerate(slices):
                 grouped_images[i].append(slice_image)
 
         # Save each grouped image
         for i, slices in enumerate(grouped_images):
-            num_rows = len(slices) // final_width if len(slices) % final_width == 0 else len(slices) // final_width + 1
+            num_rows = len(slices) // final_width + (1 if len(slices) % final_width != 0 else 0)
             row_height = max(slice_img.height for slice_img in slices)
             final_height = num_rows * row_height
 
-            final_image = Image.new('RGBA', (final_width * slice_width, final_height), (0, 0, 0, 0))  # RGBA mode with transparent background
+            # Create a blank canvas for the final image
+            final_image = Image.new('RGBA', (final_width * slice_width, final_height), (0, 0, 0, 0))
 
+            # Paste slices into the final image
             x_offset = 0
             y_offset = 0
             for slice_img in slices:
@@ -71,11 +80,15 @@ def slice_and_group_images(folder_path, file_name, grid_size, final_width):
                 x_offset += slice_width
                 if x_offset >= final_width * slice_width:
                     x_offset = 0
-                    y_offset += slice_img.height
+                    y_offset += row_height
 
-            # Save the grouped image in the subfolder
+            # Save the final grouped image
             final_image.save(os.path.join(subfolder_path, f"{file_name}_{i}.png"))
 
-path = select_folder()
-# CHANGE THESE VALUES
-slice_and_group_images(path, "slice", (12, 4), 6) 
+if __name__ == "__main__":
+    # Ask the user to select a folder
+    folder_path = select_folder()
+
+    # User-defined settings
+    slice_and_group_images(folder_path, "Cloud", (5, 3), 1)
+//
