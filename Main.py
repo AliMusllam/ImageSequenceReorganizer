@@ -83,4 +83,5 @@ path = select_folder()
 
 
 
+
 slice_and_group_images(path, "slice", (12, 4), 6) 
