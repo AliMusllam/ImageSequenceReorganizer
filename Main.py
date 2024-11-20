@@ -10,6 +10,7 @@ def select_folder():
 def slice_and_group_images(folder_path, file_name, grid_size, final_width):
 
 
+
     if folder_path:
         print("Slicing and grouping images in folder:", folder_path)
 
